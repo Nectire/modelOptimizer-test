@@ -1,13 +1,17 @@
 const { exec } = require('child_process');
+const { resolve } = require('path');
 
 function compressModel(params) {
-  exec(`gltfpack ${params.compression} -i ${params.inputFile} -o ${params.outputFile}`, 
-  { shell: true }, (err, stdout, stderr) => {
-    if (err) console.error(err);
-    if (stdout) console.log(stdout);
-    if (stderr) console.error(stderr);
-    if (!err && !stderr) console.log('Compression finished!');
-  });
+  return new Promise((res, rej) => {
+    exec(`gltfpack ${params.compression} -i ${params.inputFile} -o ${params.outputFile}`,
+      { shell: true }, (err, stdout, stderr) => {
+        if (err) rej(err);
+        if (stdout) rej(stdout);
+        if (stderr) rej(stderr);
+        if (!err && !stderr) res(console.log('Compression finished!'))
+      })
+  })
+ 
 }
 
 module.exports = compressModel;

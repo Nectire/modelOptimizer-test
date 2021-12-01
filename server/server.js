@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer')
 const fs = require('fs');
+const { promises } = require('fs');
 const compressModel = require('./compress');
 const createGLBFile = require('./createGLBFile');
 
@@ -14,36 +15,22 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.post('/compress', upload.single('model'), (req, res) => {
+app.post('/compress', upload.single('model'), async (req, res) => {
 
-  const outPutCompressedFilePath = __dirname + `/models/commpressedModel.glb`;
   const inputFilePath = 'server/models/model.glb'
-  const outputFilePath = 'server/models/commpressedModel.glb'
+  const outputFilePath = 'server/models/compressedModel.glb'
   try {
     const filePath = req.file.path;
 
     if (fs.existsSync(filePath)) {
 
-      fs.readFile(filePath, (err, data) => {
+      const data = await promises.readFile(filePath)
+      await createGLBFile(data)
+      await compressModel(({ compression: '-c', inputFile: inputFilePath, outputFile: outputFilePath }));
 
-        try {
-          if (err) throw err;
-          createGLBFile(data);
-          compressModel(({ compression: '-c', inputFile: inputFilePath, outputFile: outputFilePath }));
-        } catch (error) {
-          console.error(error);
-        }
-      })
+      const model = await promises.readFile(outputFilePath);
+      return res.json({ model: model });
     }
-    fs.readFile(outPutCompressedFilePath, (err, data) => {
-      try {
-        if (err) throw err;
-
-        return res.json({ model: data });
-      } catch (error) {
-        console.error(error);
-      }
-    })
   } catch (e) {
     console.error(e);
   }
