@@ -1,12 +1,12 @@
 import * as THREE from 'three/build/three.module.js';
 // import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import createGradient from './createGradient';
 import exportGLTF from './utils/exportGLTF';
 import importGLBModel from './utils/importGLBModel';
 
 let container;
-let camera, object, object2, material, geometry, scene1, scene2, renderer, orbitControl;
+let camera, cameraPos, model, object, object2, material, geometry, scene1, scene2, renderer, orbitControl;
 let gridHelper, sphere, waltHead;
 
 const link = document.createElement('a');
@@ -21,15 +21,16 @@ const compressedModelTriangles = document.getElementById(`compressed_model_nb_tr
 init();
 animate();
 
+
 document.getElementById('export_scene')
   .addEventListener('click', function () {
-    exportGLTF(link, scene1);
+    exportGLTF(link, scene1.children[5]);
   });
 
 document.getElementById('import_model')
   .addEventListener('change',
-    (ev) => {
-      importGLBModel(ev,scene1, modelSize, compressedModelSize, renderer)
+    async (ev) => {
+     model = await importGLBModel(ev, scene1, modelSize, compressedModelSize, renderer, camera, cameraPos)
     });
 
 function init() {
@@ -51,6 +52,8 @@ function init() {
   camera.position.set(600, 400, 0);
 
   camera.name = "PerspectiveCamera";
+  cameraPos = scene1.position;
+  console.log(cameraPos);
   scene1.add(camera);
 
   // ---------------------------------------------------------------------
@@ -75,6 +78,7 @@ function init() {
   // ---------------------------------------------------------------------
   // Grid
   // ---------------------------------------------------------------------
+
   gridHelper = new THREE.GridHelper(2000, 20, 0x888888, 0x444444);
   gridHelper.position.y = - 50;
   gridHelper.name = "Grid";
@@ -90,6 +94,7 @@ function init() {
   // ---------------------------------------------------------------------
   // OrbitControls
   // ---------------------------------------------------------------------
+
   // function createOrbitControl() {
   //   orbitControl = new OrbitControls(camera, container);
   // }
@@ -200,7 +205,8 @@ function render() {
 
   camera.position.x = Math.cos(timer) * 800;
   camera.position.z = Math.sin(timer) * 800;
-  camera.lookAt(scene1.position);
+  camera.lookAt(cameraPos);
+  // camera.lookAt(scene1.position);
   // orbitControl.update()
 
   renderer.render(scene1, camera);
