@@ -1,11 +1,12 @@
 
 const URL = 'http://localhost:3000';
 
-export function makeRequest(method = "GET", params, body, headers) {
+export async function requestModelArrayBuffer(method = "GET", params, body, headers) {
   const query = params.searchParam ? `?${params.searchParam.toString()}` : '';
 
-  return fetch(`${URL}/${params.path + query}`, {
+  const res = await fetch(`${URL}/${params.path + query}`, {
     method,
     body,
-  }).then((res) => res.json());
+  });
+  return await res.arrayBuffer()
 }

@@ -18,3 +18,16 @@ export function calcCameraDist(object, camera) {
   console.log(center);
   return center;
 }
+
+export const getCamDistancetoFitCameraToObject = function (camera, object, offset) {
+  const boundingBox = new THREE.Box3();
+  boundingBox.setFromObject(object);
+  const size = boundingBox.getSize(new THREE.Vector3());
+  // get the max side of the bounding box (fits to width OR height as needed )
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const fov = camera.fov * (Math.PI / 180);
+  let cameraZ = Math.abs(maxDim / (Math.tan(fov / 2))) + boundingBox.max.z;
+  cameraZ *= offset; // zoom out a little so that objects don't fill the screen
+  console.log('camera z : ',  cameraZ);
+  return cameraZ;
+}
