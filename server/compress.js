@@ -3,7 +3,7 @@ const { resolve } = require('path');
 
 function compressModel(params) {
   return new Promise((res, rej) => {
-    exec(`gltfpack ${params.compression} -i ${params.inputFile} -o ${params.outputFile}`,
+    exec(`gltfpack -i ${params.inputFile} -o ${params.outputFile} ${params.compression}`,
       { shell: true }, (err, stdout, stderr) => {
         if (err) rej(err);
         if (stdout) rej(stdout);
