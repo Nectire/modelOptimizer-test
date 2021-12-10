@@ -6,6 +6,7 @@ const path = require('path');
 const { promises } = require('fs');
 const compressModel = require('./compress');
 const createGLBFile = require('./createGLBFile');
+const queryParse = require('./utils/queryParse');
 
 const port = 3000;
 const upload = multer({ dest: __dirname + `/models` })
@@ -17,7 +18,6 @@ app.get('/', (req, res) => {
 })
 
 app.post('/compress', upload.single('model'), async (req, res) => {
-
   const inputFilePath = 'server/models/model.glb'
   const outputFilePath = 'server/models/compressedModel.glb'
 
@@ -27,9 +27,13 @@ app.post('/compress', upload.single('model'), async (req, res) => {
     if (fs.existsSync(filePath)) {
 
       const data = await promises.readFile(filePath);
-      await createGLBFile(data);
-      await compressModel(({ compression: '-si 0.1', inputFile: inputFilePath, outputFile: outputFilePath }));
+      if (req.query.hasOwnProperty('-si')) {
+        await createGLBFile(data);
+        const inputStr = queryParse(req.query);
+        await compressModel(({ compression: inputStr, inputFile: inputFilePath, outputFile: outputFilePath }));
 
+      }
+      
       // const model = await promises.readFile(inputFilePath);
       // const model1 = await promises.readFile(outputFilePath)
 

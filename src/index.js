@@ -13,6 +13,8 @@ const link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
 
+const reductionOutput = document.getElementById('model_redu');
+reductionOutput.innerText = '0.1'
 const rendererTriangles = document.getElementById('model_nb_triangles');
 const modelSize = document.getElementById('model_size');
 const compressedModelSize = document.getElementById(`compressed_model_size`);
@@ -21,6 +23,10 @@ const compressedModelSize = document.getElementById(`compressed_model_size`);
 init();
 animate();
 
+document.getElementById('option_max_reduction')
+  .addEventListener('input', (ev) => {
+    reductionOutput.innerText = ev.target.value;
+  } )
 
 document.getElementById('export_scene')
   .addEventListener('click', function () {
@@ -40,7 +46,8 @@ document.getElementById('import_model')
         rendererTriangles,
         renderer, 
         camera, 
-        cameraPosZoomZ
+        cameraPosZoomZ,
+        reductionValue: reductionOutput.innerText
       });
       console.log(cameraPosZoomZ);
       camera.zoom = cameraPosZoomZ;

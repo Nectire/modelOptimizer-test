@@ -27,7 +27,8 @@ export default async function importGLBModel(
     compressedModelSize,
     renderer,
     camera,
-    cameraPosZoom
+    cameraPosZoom,
+    reductionValue
   }) {
 
   const file = ev.target.files[0];
@@ -35,9 +36,13 @@ export default async function importGLBModel(
 
   const formData = new FormData();
   formData.append('model', file);
-
-  const res = await requestModelArrayBuffer('POST', { path: 'compress' }, formData);
-  console.log('res',);
+  const searchParam = new URLSearchParams();
+  searchParam.set('-si', reductionValue);
+  const res = await requestModelArrayBuffer('POST', 
+  { 
+    path: 'compress', 
+    searchParam
+   }, formData);
 
   compressedModelSize.innerText = calculateFileSize(res.byteLength);
 
