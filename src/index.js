@@ -3,11 +3,14 @@ import * as THREE from 'three/build/three.module.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import createGradient from './createGradient';
 import exportGLTF from './utils/exportGLTF';
+import { exportModelToServer } from './utils/exportModelToServer';
 import importGLBModel from './utils/importGLBModel';
+import { parseModelToScene } from './utils/loadModelToScene';
 
 let container;
 let camera, cameraPosZoomZ, model, object, object2, material, geometry, scene1, scene2, renderer, orbitControl;
 let gridHelper, gridHelper2, sphere, waltHead;
+let fileModel;
 
 const link = document.createElement('a');
 link.style.display = 'none';
@@ -18,6 +21,8 @@ reductionOutput.innerText = '0.1'
 const rendererTriangles = document.getElementById('model_nb_triangles');
 const modelSize = document.getElementById('model_size');
 const compressedModelSize = document.getElementById(`compressed_model_size`);
+const btnCompress = document.getElementById('btn_compress');
+const selectModels = document.getElementById('redu_models');
 // const compressedModelTriangles = document.getElementById(`compressed_model_nb_triangles`);
 
 init();
@@ -36,22 +41,24 @@ document.getElementById('export_scene')
 document.getElementById('import_model')
   .addEventListener('change',
     async (ev) => {
+      fileModel = ev.target.files[0];
 
       model = await importGLBModel({
-        ev, 
+        fileModel,
         scene1, 
-        scene2, 
         modelSize, 
-        compressedModelSize,
-        rendererTriangles,
         renderer, 
-        camera, 
-        cameraPosZoomZ,
-        reductionValue: reductionOutput.innerText
       });
-      console.log(cameraPosZoomZ);
-      camera.zoom = cameraPosZoomZ;
+
+      ev.target.value = '';
     });
+
+
+btnCompress.addEventListener('click', async () => {
+  const { fileLink } = await exportModelToServer(fileModel, reductionOutput.innerText, selectModels);
+
+  parseModelToScene(fileLink, renderer, scene2);
+})
 
 function init() {
   console.log("init")

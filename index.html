@@ -25,7 +25,9 @@
     <label><input id="option_maxsize" name="maxSize" type="number" value="1024" min="2" max="4096" step="256"
         checked="checked"> Max texture size</label>
     <br>
-    <label><input id="option_max_reduction" name="maxRedu" type="range" value="0.1" min="0.1" max="1" step="0.1"> Size of reduction: <output id="model_redu"></output> </label>
+    <label><input id="option_max_reduction" name="maxRedu" type="range" value="0.1" min="0.1" max="100" step="0.1"> Size of reduction: <output id="model_redu"></output> </label> <select name="redu_models" id="redu_models">
+      <option value="" disabled>select model</option>
+    </select> <button id="btn_compress">Test</button>
     <br>
     <b><label>Model size: <output id="model_size"></output></label></b>
     <br>
