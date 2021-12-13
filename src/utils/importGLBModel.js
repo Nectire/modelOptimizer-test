@@ -1,14 +1,17 @@
-import calculateFileSize from './calculateFileSize';
-import { parseModelToScene } from "./loadModelToScene";
+// import calculateFileSize from './calculateFileSize';
+import { parseModelToScene } from "./parseModelToScene";
+import { API } from '../API';
 
 export default async function importGLBModel(
   {
     fileModel,
     scene1,
-    modelSize,
     renderer,
   }) {
-  modelSize.innerText = calculateFileSize(fileModel.size);
+  const formData = new FormData();
+  formData.set('model', fileModel);
+  const res = await new API().uploadModel(formData, {path: 'upload'});
+
 
   const reader = new FileReader();
   reader.readAsArrayBuffer(fileModel);
@@ -18,4 +21,5 @@ export default async function importGLBModel(
     parseModelToScene(ev.target.result, renderer, scene1);
   }
 
+  return res;
 }

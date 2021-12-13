@@ -1,22 +1,18 @@
-import { makeRequest } from "./makeRequest";
 
-export async function exportModelToServer(file, reductionValue, selectModels) {
-  const formData = new FormData();
-  formData.append('model', file);
+import {API} from '../API'
+
+export async function exportModelToServer(path, reductionValue, selectModels) {
   const searchParam = new URLSearchParams();
   searchParam.set('-si', reductionValue);
 
-  const res = await makeRequest('POST',
-    {
-      path: 'compress',
-      searchParam
-    }, formData);
+  const res = await new API().compressModelByPath({path: 'compress/' + path, searchParam })
 
   console.log('res ', res);
   const option = document.createElement('option');
   option.value = res.fileLink;
   option.innerText = res.fileName;
   selectModels.appendChild(option);
+  selectModels.value = res.fileLink;
   
   return res;
 }
