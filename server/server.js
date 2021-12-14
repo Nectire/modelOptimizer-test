@@ -48,15 +48,27 @@ app.post('/compress/:path', async (req, res) => {
     if (fs.existsSync(filePath)) {
 
       if (req.query.hasOwnProperty('-si')) {
-        const inputStr = queryParse(req.query);
+        const compressParams = queryParse(req.query);
         
-        const numbs= inputStr.match(/(\d+\.)?\d+/)[0];
+        const numbs= compressParams.match(/(\d+\.)?\d+/)[0];
+
         const fileName = req.params.path.match(/^(.+)(\..+)$/)[1] + `_compressed_${numbs}.glb`;
         const outputFilePath = 'server/public/models/' + fileName;
         
-        await compressModel(({ compression: inputStr, inputFile: filePath, outputFile: outputFilePath }));
+        await compressModel(({ compression: compressParams, inputFile: filePath, outputFile: outputFilePath }));
+
+        const file = await promises.readFile(outputFilePath);
+        
         console.log('compressed ', outputFilePath);
-        return res.json({ fileLink: outputFilePath, fileName, })
+        return res.json({ fileLink: outputFilePath, fileName,
+        file, })
+        // return res.sendFile('public/models/'+ fileName, { root: path.join(__dirname) }, function (err) {
+        //   if (err) {
+        //     console.error(err);
+        //   } else {
+        //     console.log('Sent:', outputFilePath);
+        //   }
+        // });
       }
     }
   } catch (e) {

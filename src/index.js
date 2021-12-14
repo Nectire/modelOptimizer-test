@@ -24,8 +24,10 @@ const link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
 
+const downloadLink = document.getElementById('download_model');
+
 const btnImport = document.getElementById('import_model');
-const btnExportScene = document.getElementById('export_scene');
+// const btnExportScene = document.getElementById('export_scene');
 const reductionOutput = document.getElementById('model_redu');
 reductionOutput.innerText = '0.1'
 const rendererTriangles = document.getElementById('model_nb_triangles');
@@ -43,14 +45,14 @@ document.getElementById('option_max_reduction')
     reductionOutput.innerText = ev.target.value;
   } )
 
-btnExportScene.addEventListener('click', function () {
-  // const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
-  const model = scene2compressed;
+// btnExportScene.addEventListener('click', function () {
+//   // const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+//   // const model = scene2compressed.children[4].children[0];
 
-  // const model = scene2compressed.children[4];
-  console.log('model ',model);
-  exportGLTF(link, model);
-  });
+//   const model = scene2compressed;
+//   console.log(model);
+//   exportGLTF(link, model);
+//   });
 
 btnImport.addEventListener('change',
     async (ev) => {
@@ -89,6 +91,7 @@ selectModels.addEventListener('change', (ev) => {
   }
   
   const modelPath = ev.target.value;
+  downloadLink.href = modelPath;
   parseModelToScene(modelPath, renderer, scene2compressed);
   console.log('scene select',scene2compressed);
 })
@@ -106,6 +109,8 @@ btnCompress.addEventListener('click', async () => {
 
   const { fileLink } = await exportModelToServer(UNCOMP_MODEL_NAME, reductionOutput.innerText, selectModels);
 
+  downloadLink.href = fileLink;
+  // compressedModelSize.innerText =  calculateFileSize(file.byteLength);
   parseModelToScene(fileLink, renderer, scene2compressed);
 })
 
