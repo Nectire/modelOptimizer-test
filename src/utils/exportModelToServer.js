@@ -7,7 +7,6 @@ export async function exportModelToServer(path, reductionValue, selectModels) {
 
   const res = await new API().compressModelByPath({path: 'compress/' + path, searchParam })
 
-  console.log('res ', res);
   const option = document.createElement('option');
   option.value = res.fileLink;
   option.innerText = res.fileName;

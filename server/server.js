@@ -55,6 +55,7 @@ app.post('/compress/:path', async (req, res) => {
         const outputFilePath = 'server/public/models/' + fileName;
         
         await compressModel(({ compression: inputStr, inputFile: filePath, outputFile: outputFilePath }));
+        console.log('compressed ', outputFilePath);
         return res.json({ fileLink: outputFilePath, fileName, })
       }
     }

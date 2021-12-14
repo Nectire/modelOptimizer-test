@@ -9,6 +9,11 @@ import { parseModelToScene } from './utils/parseModelToScene';
 import calculateFileSize from './utils/calculateFileSize';
 import { deleteObjRecursively } from './utils/deleteObject';
 
+export const COMP_OBJ_NAME = 'CompressedModel';
+export const COMP_OBJ_HELPER_NAME = 'CompressedModelHelper';
+export const UNCOMP_OBJ_NAME = 'ModelFromFile';
+export const UNCOMP_OBJ_HELPER_NAME = 'ModelFromFileHelper';
+
 let container;
 let camera, cameraPosZoomZ, model, object, object2, material, geometry, scene1, scene2compressed, renderer, orbitControl;
 let gridHelper, gridHelper2, sphere, waltHead;
@@ -39,11 +44,8 @@ document.getElementById('option_max_reduction')
   } )
 
 btnExportScene.addEventListener('click', function () {
-  const model = scene2compressed.children.find(obj => {
-    if (obj.name === "CompressedModel") {
-      return obj
-    }
-  });
+  // const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+  const model = scene2compressed;
 
   // const model = scene2compressed.children[4];
   console.log('model ',model);
@@ -52,13 +54,14 @@ btnExportScene.addEventListener('click', function () {
 
 btnImport.addEventListener('change',
     async (ev) => {
-      scene1.traverse((obj) => {
-        if (obj.name === 'ModelFromFile' || obj.name === 'ModelFromFileHelper') {
-          console.log('found');
-          deleteObjRecursively(obj);
-        }
-      });
+      const model = scene1.getObjectByName(UNCOMP_OBJ_NAME);
+      const helper = scene1.getObjectByName(UNCOMP_OBJ_HELPER_NAME);
 
+      if (model && helper) {
+        scene1.remove(model);
+        scene1.remove(helper);
+        animate();
+      }
       fileModel = ev.target.files[0];
 
       const res = await importGLBModel({
@@ -75,26 +78,32 @@ btnImport.addEventListener('change',
 
 
 selectModels.addEventListener('change', (ev) => {
-  scene2compressed.traverse((obj) => {
-    if (obj.name === 'CompressedModel' || obj.name === 'CompressedModelHelper') {
-      console.log('found');
-      deleteObjRecursively(obj);
-    }
-  });
+
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+  const helper = scene2compressed.getObjectByName(COMP_OBJ_HELPER_NAME);
+
+  if(model && helper) {
+    scene2compressed.remove(model); 
+    scene2compressed.remove(helper); 
+    animate();
+  }
   
   const modelPath = ev.target.value;
   parseModelToScene(modelPath, renderer, scene2compressed);
-  console.log(scene2compressed);
+  console.log('scene select',scene2compressed);
 })
 
 btnCompress.addEventListener('click', async () => {
+
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+  const helper = scene2compressed.getObjectByName(COMP_OBJ_HELPER_NAME);
   
-  scene2compressed.traverse((obj) => {
-    if (obj.name === 'CompressedModel' || obj.name ==='CompressedModelHelper')  {
-      console.log('finded');
-      deleteObjRecursively(obj);
-    }
-  } );
+  if(model && helper) {
+    scene2compressed.remove(model); 
+    scene2compressed.remove(helper); 
+    animate();
+  }
+
   const { fileLink } = await exportModelToServer(UNCOMP_MODEL_NAME, reductionOutput.innerText, selectModels);
 
   parseModelToScene(fileLink, renderer, scene2compressed);

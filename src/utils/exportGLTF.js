@@ -11,6 +11,7 @@ export default function exportGLTF(link, input) {
     maxTextureSize: Number(document.getElementById('option_maxsize').value) || Infinity // To prevent NaN value
   };
 
+  console.log(input);
   gltfExporter.parse(input, function (result) {
     console.log(options);
     if (result instanceof ArrayBuffer) {
@@ -20,6 +21,8 @@ export default function exportGLTF(link, input) {
       saveString(link,output, 'scene.gltf');
     }
 
+  }, (err) => {
+    console.error(err);
   }, options);
 }
 

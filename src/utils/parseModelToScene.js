@@ -1,8 +1,10 @@
 
 import { BoxHelper} from "three";
+import { COMP_OBJ_HELPER_NAME, COMP_OBJ_NAME, UNCOMP_OBJ_HELPER_NAME, UNCOMP_OBJ_NAME } from "..";
 import createGLTFLoader from "./createLoader";
 
 export function parseModelToScene(loadedModel, renderer, scene) {
+  
   const loader = createGLTFLoader(renderer);
     // Load Model from file
   if (typeof loadedModel !== 'string') {
@@ -11,10 +13,10 @@ export function parseModelToScene(loadedModel, renderer, scene) {
       console.log("it's loaded", gltf);
       const model = gltf.scene;
       model.scale.set(1000, 1000, 1000);
-      model.name = 'ModelFromFile';
+      model.name = UNCOMP_OBJ_NAME;
 
       const helper = new BoxHelper(model, 0x00ff00);
-      helper.name ='ModelFromFileHelper';
+      helper.name =UNCOMP_OBJ_HELPER_NAME;
 
       helper.update();
       scene.add(model, helper);
@@ -32,9 +34,9 @@ export function parseModelToScene(loadedModel, renderer, scene) {
         // compressedModelSize.innerText = calculateFileSize(res.byteLength);
         const model = gltf.scene;
         model.scale.set(1000, 1000, 1000);
-        model.name = 'CompressedModel';
+        model.name = COMP_OBJ_NAME;
         const helper = new BoxHelper(model, 0x00ff00);
-        helper.name = 'CompressedModelHelper';
+        helper.name = COMP_OBJ_HELPER_NAME;
 
         helper.update();
         scene.add(model, helper);
