@@ -1,13 +1,10 @@
 import * as THREE from 'three/build/three.module.js';
-// import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import createGradient from './createGradient';
 import exportGLTF from './utils/exportGLTF';
 import { exportModelToServer } from './utils/exportModelToServer';
 import importGLBModel from './utils/importGLBModel';
 import { parseModelToScene } from './utils/parseModelToScene';
 import calculateFileSize from './utils/calculateFileSize';
-import { deleteObjRecursively } from './utils/deleteObject';
 
 export const COMP_OBJ_NAME = 'CompressedModel';
 export const COMP_OBJ_HELPER_NAME = 'CompressedModelHelper';
@@ -24,15 +21,15 @@ const link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
 
-const downloadLink = document.getElementById('download_model');
+// const downloadLink = document.getElementById('download_model');
 
 const btnImport = document.getElementById('import_model');
-// const btnExportScene = document.getElementById('export_scene');
+const btnExportScene = document.getElementById('export_scene');
 const reductionOutput = document.getElementById('model_redu');
 reductionOutput.innerText = '0.1'
 const rendererTriangles = document.getElementById('model_nb_triangles');
 const modelSize = document.getElementById('model_size');
-const compressedModelSize = document.getElementById(`compressed_model_size`);
+// const compressedModelSize = document.getElementById(`compressed_model_size`);
 const btnCompress = document.getElementById('btn_compress');
 const selectModels = document.getElementById('redu_models');
 // const compressedModelTriangles = document.getElementById(`compressed_model_nb_triangles`);
@@ -45,14 +42,12 @@ document.getElementById('option_max_reduction')
     reductionOutput.innerText = ev.target.value;
   } )
 
-// btnExportScene.addEventListener('click', function () {
-//   // const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
-//   // const model = scene2compressed.children[4].children[0];
+btnExportScene.addEventListener('click', function () {
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
 
-//   const model = scene2compressed;
-//   console.log(model);
-//   exportGLTF(link, model);
-//   });
+  // reduceTextureSizes(model)
+  exportGLTF(link, model);
+  });
 
 btnImport.addEventListener('change',
     async (ev) => {
@@ -65,12 +60,13 @@ btnImport.addEventListener('change',
         animate();
       }
       fileModel = ev.target.files[0];
-
+      
       const res = await importGLBModel({
         fileModel,
         scene1, 
         renderer, 
       });
+
 
       modelSize.innerText = calculateFileSize(res.size);
       UNCOMP_MODEL_NAME = res.filename;
@@ -93,7 +89,6 @@ selectModels.addEventListener('change', (ev) => {
   const modelPath = ev.target.value;
   downloadLink.href = modelPath;
   parseModelToScene(modelPath, renderer, scene2compressed);
-  console.log('scene select',scene2compressed);
 })
 
 btnCompress.addEventListener('click', async () => {
@@ -109,7 +104,6 @@ btnCompress.addEventListener('click', async () => {
 
   const { fileLink } = await exportModelToServer(UNCOMP_MODEL_NAME, reductionOutput.innerText, selectModels);
 
-  downloadLink.href = fileLink;
   // compressedModelSize.innerText =  calculateFileSize(file.byteLength);
   parseModelToScene(fileLink, renderer, scene2compressed);
 })
@@ -249,3 +243,5 @@ function render() {
   renderer.render(scene1, camera);
   renderer.render(scene2compressed, camera);
 }
+
+

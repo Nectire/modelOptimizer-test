@@ -1,5 +1,5 @@
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js';
-import {Object3D} from 'three'
+
 export default function exportGLTF(link, input) {
 
   const gltfExporter = new GLTFExporter();
@@ -12,8 +12,6 @@ export default function exportGLTF(link, input) {
     maxTextureSize: Number(document.getElementById('option_maxsize').value) || Infinity // To prevent NaN value
   };
   
-  console.log(input,options);
-
   gltfExporter.parse(input, function (result) {
     if (result instanceof ArrayBuffer) {
       saveArrayBuffer(link, result, 'scene.glb');

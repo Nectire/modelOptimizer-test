@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { promises } = require('fs');
 const compressModel = require('./compress');
-const createGLBFile = require('./createGLBFile');
+// const createGLBFile = require('./createGLBFile');
 const queryParse = require('./utils/queryParse');
 
 const port = 3000;
@@ -49,26 +49,18 @@ app.post('/compress/:path', async (req, res) => {
 
       if (req.query.hasOwnProperty('-si')) {
         const compressParams = queryParse(req.query);
+        const noKHRTexTransform = '-noq ';
         
         const numbs= compressParams.match(/(\d+\.)?\d+/)[0];
 
         const fileName = req.params.path.match(/^(.+)(\..+)$/)[1] + `_compressed_${numbs}.glb`;
         const outputFilePath = 'server/public/models/' + fileName;
         
-        await compressModel(({ compression: compressParams, inputFile: filePath, outputFile: outputFilePath }));
+        await compressModel(({ compression: noKHRTexTransform + compressParams, inputFile: filePath, outputFile: outputFilePath }));
 
-        const file = await promises.readFile(outputFilePath);
+        // const file = await promises.readFile(outputFilePath);
         
-        console.log('compressed ', outputFilePath);
-        return res.json({ fileLink: outputFilePath, fileName,
-        file, })
-        // return res.sendFile('public/models/'+ fileName, { root: path.join(__dirname) }, function (err) {
-        //   if (err) {
-        //     console.error(err);
-        //   } else {
-        //     console.log('Sent:', outputFilePath);
-        //   }
-        // });
+        return res.json({ fileLink: outputFilePath, fileName})
       }
     }
   } catch (e) {

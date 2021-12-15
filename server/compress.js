@@ -1,5 +1,4 @@
 const { exec } = require('child_process');
-const { resolve } = require('path');
 
 function compressModel(params) {
   return new Promise((res, rej) => {

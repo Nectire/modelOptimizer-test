@@ -10,7 +10,7 @@ export function parseModelToScene(loadedModel, renderer, scene) {
   if (typeof loadedModel !== 'string') {
 
     loader.parse(loadedModel, '', (gltf) => {
-      console.log("it's loaded", gltf);
+      console.log("it's loaded");
       const model = gltf.scene;
       model.scale.set(1000, 1000, 1000);
       model.name = UNCOMP_OBJ_NAME;
@@ -30,7 +30,7 @@ export function parseModelToScene(loadedModel, renderer, scene) {
     loader.load(
       '../' + loadedModel,
       (gltf) => {
-        console.log("it's loaded", gltf);
+        console.log("it's loaded");
         // compressedModelSize.innerText = calculateFileSize(res.byteLength);
         const model = gltf.scene;
         model.scale.set(1000, 1000, 1000);
