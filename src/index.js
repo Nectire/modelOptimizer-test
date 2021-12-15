@@ -1,23 +1,37 @@
 import * as THREE from 'three/build/three.module.js';
-// import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import createGradient from './createGradient';
 import exportGLTF from './utils/exportGLTF';
+import { exportModelToServer } from './utils/exportModelToServer';
 import importGLBModel from './utils/importGLBModel';
+import { parseModelToScene } from './utils/parseModelToScene';
+import calculateFileSize from './utils/calculateFileSize';
+
+export const COMP_OBJ_NAME = 'CompressedModel';
+export const COMP_OBJ_HELPER_NAME = 'CompressedModelHelper';
+export const UNCOMP_OBJ_NAME = 'ModelFromFile';
+export const UNCOMP_OBJ_HELPER_NAME = 'ModelFromFileHelper';
 
 let container;
-let camera, cameraPosZoomZ, model, object, object2, material, geometry, scene1, scene2, renderer, orbitControl;
+let camera, cameraPosZoomZ, model, object, object2, material, geometry, scene1, scene2compressed, renderer, orbitControl;
 let gridHelper, gridHelper2, sphere, waltHead;
+let fileModel;
+let UNCOMP_MODEL_NAME;
 
 const link = document.createElement('a');
 link.style.display = 'none';
 document.body.appendChild(link); // Firefox workaround, see #6594
 
+// const downloadLink = document.getElementById('download_model');
+
+const btnImport = document.getElementById('import_model');
+const btnExportScene = document.getElementById('export_scene');
 const reductionOutput = document.getElementById('model_redu');
 reductionOutput.innerText = '0.1'
 const rendererTriangles = document.getElementById('model_nb_triangles');
 const modelSize = document.getElementById('model_size');
-const compressedModelSize = document.getElementById(`compressed_model_size`);
+// const compressedModelSize = document.getElementById(`compressed_model_size`);
+const btnCompress = document.getElementById('btn_compress');
+const selectModels = document.getElementById('redu_models');
 // const compressedModelTriangles = document.getElementById(`compressed_model_nb_triangles`);
 
 init();
@@ -28,36 +42,78 @@ document.getElementById('option_max_reduction')
     reductionOutput.innerText = ev.target.value;
   } )
 
-document.getElementById('export_scene')
-  .addEventListener('click', function () {
-    exportGLTF(link, scene1.children[5]);
+btnExportScene.addEventListener('click', function () {
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+
+  // reduceTextureSizes(model)
+  exportGLTF(link, model);
   });
 
-document.getElementById('import_model')
-  .addEventListener('change',
+btnImport.addEventListener('change',
     async (ev) => {
+      const model = scene1.getObjectByName(UNCOMP_OBJ_NAME);
+      const helper = scene1.getObjectByName(UNCOMP_OBJ_HELPER_NAME);
 
-      model = await importGLBModel({
-        ev, 
+      if (model && helper) {
+        scene1.remove(model);
+        scene1.remove(helper);
+        animate();
+      }
+      fileModel = ev.target.files[0];
+      
+      const res = await importGLBModel({
+        fileModel,
         scene1, 
-        scene2, 
-        modelSize, 
-        compressedModelSize,
-        rendererTriangles,
         renderer, 
-        camera, 
-        cameraPosZoomZ,
-        reductionValue: reductionOutput.innerText
       });
-      console.log(cameraPosZoomZ);
-      camera.zoom = cameraPosZoomZ;
+
+
+      modelSize.innerText = calculateFileSize(res.size);
+      UNCOMP_MODEL_NAME = res.filename;
+
+      ev.target.value = '';
     });
+
+
+selectModels.addEventListener('change', (ev) => {
+
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+  const helper = scene2compressed.getObjectByName(COMP_OBJ_HELPER_NAME);
+
+  if(model && helper) {
+    scene2compressed.remove(model); 
+    scene2compressed.remove(helper); 
+    animate();
+  }
+  
+  const modelPath = ev.target.value;
+  downloadLink.href = modelPath;
+  parseModelToScene(modelPath, renderer, scene2compressed);
+})
+
+btnCompress.addEventListener('click', async () => {
+
+  const model = scene2compressed.getObjectByName(COMP_OBJ_NAME);
+  const helper = scene2compressed.getObjectByName(COMP_OBJ_HELPER_NAME);
+  
+  if(model && helper) {
+    scene2compressed.remove(model); 
+    scene2compressed.remove(helper); 
+    animate();
+  }
+
+  const { fileLink } = await exportModelToServer(UNCOMP_MODEL_NAME, reductionOutput.innerText, selectModels);
+
+  // compressedModelSize.innerText =  calculateFileSize(file.byteLength);
+  parseModelToScene(fileLink, renderer, scene2compressed);
+})
 
 function init() {
   console.log("init")
   container = document.createElement('div');
   document.body.appendChild(container);
 
+  
   // const gradientTexture = createGradient();
 
   // ---------------------------------------------------------------------
@@ -68,9 +124,9 @@ function init() {
   scene1.background = backColor;
   scene1.name = 'Scene1';
 
-  scene2 = new THREE.Scene();
-  scene2.name = 'Scene2';
-  scene2.translateX(520);
+  scene2compressed = new THREE.Scene();
+  scene2compressed.name = 'Scene2compressed';
+  scene2compressed.translateX(520);
   
   // ---------------------------------------------------------------------
   // Perspective Camera
@@ -91,7 +147,7 @@ function init() {
 
   const ambientLight2 = new THREE.AmbientLight(0xffffff, 2);
   ambientLight2.name = 'AmbientLight 2';
-  scene2.add(ambientLight2);
+  scene2compressed.add(ambientLight2);
   // ---------------------------------------------------------------------
   // DirectLight
   // ---------------------------------------------------------------------
@@ -109,7 +165,7 @@ function init() {
   dirLight2.add(dirLight.target);
   // dirLight2.target.position.set(0, 10000, - 1);
   dirLight2.lookAt(0, 0, 0);
-  scene2.add(dirLight2);
+  scene2compressed.add(dirLight2);
 
   // ---------------------------------------------------------------------
   // Grid
@@ -123,7 +179,7 @@ function init() {
   gridHelper2 = new THREE.GridHelper(500, 20, 0xaabb55, 0xaabb99);
   gridHelper2.position.y = - 50;
   gridHelper2.name = "Grid 2";
-  scene2.add(gridHelper2);
+  scene2compressed.add(gridHelper2);
 
   // ---------------------------------------------------------------------
   // Axes
@@ -133,7 +189,7 @@ function init() {
   const axes1 = new THREE.AxesHelper(400);
   axes1.name = "AxesHelper";
   scene1.add(axes);
-  scene2.add(axes1);
+  scene2compressed.add(axes1);
 
   // ---------------------------------------------------------------------
   // OrbitControls
@@ -185,5 +241,7 @@ function render() {
   renderer.autoClear = false;
 
   renderer.render(scene1, camera);
-  renderer.render(scene2, camera);
+  renderer.render(scene2compressed, camera);
 }
+
+

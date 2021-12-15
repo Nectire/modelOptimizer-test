@@ -15,7 +15,8 @@
     <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> webgl - exporter - gltf<br /><br />
     <label for="import_model"> Import model: <input type="file" name="import_model" accept=".glb"
         id="import_model"></label>
-    <button id="export_scene">Export Scene1</button>
+    <button id="export_scene">Export compressed model</button>
+    <!-- <a id="download_model"  download="model.glb">download compressed model</a> -->
     <br /><br />
     <label><input id="option_trs" name="trs" type="checkbox" />TRS</label>
     <label><input id="option_visible" name="visible" type="checkbox" checked="checked" />Only Visible</label>
@@ -25,11 +26,13 @@
     <label><input id="option_maxsize" name="maxSize" type="number" value="1024" min="2" max="4096" step="256"
         checked="checked"> Max texture size</label>
     <br>
-    <label><input id="option_max_reduction" name="maxRedu" type="range" value="0.1" min="0.1" max="1" step="0.1"> Size of reduction: <output id="model_redu"></output> </label>
+    <label><input id="option_max_reduction" name="maxRedu" type="range" value="0.1" min="0.1" max="1" step="0.1"> Size of reduction: <output id="model_redu"></output> </label> <select name="redu_models" id="redu_models">
+      <option value="" disabled>select model</option>
+    </select> <button id="btn_compress">Compress</button>
     <br>
     <b><label>Model size: <output id="model_size"></output></label></b>
     <br>
-    <b><label>Commpressed Model size: <output id="compressed_model_size"></output></label></b>
+    <b><label>Compressed Model size: <output id="compressed_model_size"></output></label></b>
     <br>
     <!-- <b><label>Nb of triangles of commpressed moodel: <output id="compressed_model_nb_triangles"></output></label></b> -->
     <b><label>Nb of renderer triangles:<output id="model_nb_triangles"></output></label></b>
